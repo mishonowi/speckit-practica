@@ -405,6 +405,13 @@ function dibujarTarea(tarea) {
 
   cabecera.append(titulo, chip);
 
+  // HU3: indicador de plazo con texto e ícono, no solo color (accesibilidad).
+  const indicador = INDICADORES_PLAZO[tarea.estado_plazo];
+  if (indicador) {
+    item.classList.add(`tarea-${tarea.estado_plazo}`);
+    cabecera.append(dibujarIndicadorPlazo(indicador));
+  }
+
   const fecha = document.createElement("p");
   fecha.className = "tarea-fecha";
   const tiempo = document.createElement("time");
@@ -554,4 +561,37 @@ campoTitulo.addEventListener("input", actualizarContadoresTarea);
 campoDescripcion.addEventListener("input", actualizarContadoresTarea);
 formTarea.addEventListener("submit", guardarTarea);
 botonCancelarTarea.addEventListener("click", reiniciarFormularioTarea);
+
+// ---------------------------------------------------------------------------
+// Vencidas y urgentes (Historia 3)
+// ---------------------------------------------------------------------------
+
+// El servidor calcula estado_plazo; "normal" y "ninguno" no muestran indicador.
+const INDICADORES_PLAZO = {
+  vencida: { texto: "Vencida", icono: "⚠" },
+  urgente: { texto: "Urgente", icono: "⏰" },
+};
+
+// Cada cuánto se vuelve a pedir el listado para que una tarea pase de
+// "urgente" a "vencida" (o de "normal" a "urgente") con la aplicación abierta.
+const INTERVALO_REFRESCO_MS = 60 * 1000;
+
+function dibujarIndicadorPlazo(indicador) {
+  const etiqueta = document.createElement("span");
+  etiqueta.className = "indicador-plazo";
+  const icono = document.createElement("span");
+  icono.setAttribute("aria-hidden", "true");
+  icono.textContent = indicador.icono;
+  etiqueta.append(icono, ` ${indicador.texto}`);
+  return etiqueta;
+}
+
+setInterval(cargarTareas, INTERVALO_REFRESCO_MS);
+// Al volver a la pestaña (p. ej. tras dejar el celular bloqueado) se actualiza de inmediato.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    cargarTareas();
+  }
+});
+
 recargarTodo();
