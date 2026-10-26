@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Organizador de Tareas Académicas</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header class="encabezado">
+    <h1>Organizador de Tareas</h1>
+  </header>
+
+  <main class="contenido">
+    <!-- Mensaje general de errores de comunicación (se completa en la Historia 2). -->
+    <p id="aviso" class="aviso" role="alert" hidden></p>
+
+    <section id="seccion-materias" aria-labelledby="titulo-materias">
+      <h2 id="titulo-materias">Materias</h2>
+      <form id="form-materia" novalidate>
+        <input type="hidden" id="materia-id">
+        <div class="campo">
+          <label for="materia-nombre">Nombre de la materia</label>
+          <input id="materia-nombre" type="text" maxlength="50" autocomplete="off"
+                 aria-describedby="materia-nombre-ayuda materia-nombre-error" required>
+          <p id="materia-nombre-ayuda" class="ayuda">Máximo 50 caracteres. <span id="materia-nombre-contador">0/50</span></p>
+          <p id="materia-nombre-error" class="error-campo" role="alert"></p>
+        </div>
+        <fieldset class="campo" aria-describedby="materia-color-error">
+          <legend>Color</legend>
+          <div id="materia-colores" class="colores"></div>
+          <p id="materia-color-error" class="error-campo" role="alert"></p>
+        </fieldset>
+        <p id="materia-error" class="error-campo" role="alert"></p>
+        <div class="acciones">
+          <button type="submit" id="materia-guardar">Agregar materia</button>
+          <button type="button" id="materia-cancelar" class="secundario" hidden>Cancelar edición</button>
+        </div>
+      </form>
+      <p id="materias-vacio" class="vacio" hidden>Aún no tienes materias. Agrega la primera para poder crear tareas.</p>
+      <ul id="lista-materias" class="lista"></ul>
+    </section>
+
+    <section id="seccion-tareas" aria-labelledby="titulo-tareas">
+      <h2 id="titulo-tareas">Tareas</h2>
+      <!-- Formulario, filtros y listado de tareas: Historias 2 a 5. -->
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

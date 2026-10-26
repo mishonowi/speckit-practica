@@ -1,0 +1,232 @@
+/* Diseño adaptable: se escribe primero para celular y se amplía en pantallas grandes. */
+:root {
+  --fondo: #f6f7f9;
+  --superficie: #ffffff;
+  --texto: #1b1f24;
+  --texto-suave: #4a5260;
+  --borde: #c9ced6;
+  --primario: #1a56b0;
+  --primario-texto: #ffffff;
+  --error: #b3261e;
+  --vencida: #b3261e;
+  --urgente: #8a4b00;
+  --radio: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+.encabezado {
+  background: var(--primario);
+  color: var(--primario-texto);
+  padding: 1rem;
+}
+
+.encabezado h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.contenido {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+section {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+  max-width: 100%;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  color: var(--texto);
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--primario);
+  border-radius: var(--radio);
+  background: var(--primario);
+  color: var(--primario-texto);
+  cursor: pointer;
+}
+
+button.secundario {
+  background: var(--superficie);
+  color: var(--primario);
+}
+
+/* Foco visible para quienes usan teclado. */
+:focus-visible {
+  outline: 3px solid #f5a300;
+  outline-offset: 2px;
+}
+
+.error-campo,
+.aviso {
+  color: var(--error);
+  font-size: 0.9rem;
+}
+
+@media (min-width: 48rem) {
+  .encabezado h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* --- Materias --- */
+.campo {
+  margin-bottom: 0.75rem;
+  border: 0;
+  padding: 0;
+}
+
+legend {
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 0.25rem;
+}
+
+.ayuda {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.error-campo {
+  margin: 0.25rem 0 0;
+}
+
+.error-campo:empty {
+  display: none;
+}
+
+.colores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Cada color es un botón de opción real, operable con teclado. */
+.color-opcion {
+  position: relative;
+  margin: 0;
+}
+
+.color-opcion input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.color-opcion .muestra {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: transparent;
+  cursor: pointer;
+}
+
+/* La marca de selección no depende solo del color: se ve un ✓ y un borde. */
+.color-opcion input:checked + .muestra {
+  border-color: var(--texto);
+  color: var(--marca);
+}
+
+.color-opcion input:focus-visible + .muestra {
+  outline: 3px solid #f5a300;
+  outline-offset: 2px;
+}
+
+/* Texto solo para lectores de pantalla (nombre del color). */
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lista {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.vacio {
+  color: var(--texto-suave);
+}
+
+.materia-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--borde);
+}
+
+.materia-chip {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 600;
+  flex: 1 1 10rem;
+}
+
+.materia-total {
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
