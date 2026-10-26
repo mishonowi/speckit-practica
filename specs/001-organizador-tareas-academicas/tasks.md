@@ -110,13 +110,13 @@ Proyecto único (ver [plan.md](plan.md)): código en `app/`, pruebas en `tests/`
 
 ### Pruebas de la Historia 3 (escribir primero; deben fallar)
 
-- [ ] T028 [P] [HU3] Pruebas unitarias en `tests/unit/test_plazo.py` de `calcular_estado_plazo(fecha_entrega, completada, ahora)`: fecha pasada → `vencida`; fecha igual a `ahora` → `vencida`; 47 h → `urgente`; exactamente 48 h → `urgente`; 48 h y 1 segundo → `normal`; completada (con fecha pasada o próxima) → `ninguno`
-- [ ] T029 [P] [HU3] Prueba de integración en `tests/integration/test_tareas.py`: `GET /api/tareas` incluye `estado_plazo` correcto para tareas vencida, urgente y normal creadas con fechas relativas al momento actual
+- [X] T028 [P] [HU3] Pruebas unitarias en `tests/unit/test_plazo.py` de `calcular_estado_plazo(fecha_entrega, completada, ahora)`: fecha pasada → `vencida`; fecha igual a `ahora` → `vencida`; 47 h → `urgente`; exactamente 48 h → `urgente`; 48 h y 1 segundo → `normal`; completada (con fecha pasada o próxima) → `ninguno`
+- [X] T029 [P] [HU3] Prueba de integración en `tests/integration/test_tareas.py`: `GET /api/tareas` incluye `estado_plazo` correcto para tareas vencida, urgente y normal creadas con fechas relativas al momento actual
 
 ### Implementación de la Historia 3
 
-- [ ] T030 [HU3] Crear `app/plazo.py` con la función pura `calcular_estado_plazo(fecha_entrega, completada, ahora)` según la regla de [data-model.md](data-model.md): completada → `ninguno`; `fecha_entrega <= ahora` → `vencida`; `fecha_entrega - ahora <= 48 horas` → `urgente`; en otro caso → `normal`; con comentario en español que explique que el cálculo es por horas exactas
-- [ ] T031 [HU3] Añadir `estado_plazo` a `TareaSalida` en `app/esquemas.py` y calcularlo con `datetime.now(timezone.utc)` en `app/rutas_tareas.py` para cada tarea devuelta
+- [X] T030 [HU3] Crear `app/plazo.py` con la función pura `calcular_estado_plazo(fecha_entrega, completada, ahora)` según la regla de [data-model.md](data-model.md): completada → `ninguno`; `fecha_entrega <= ahora` → `vencida`; `fecha_entrega - ahora <= 48 horas` → `urgente`; en otro caso → `normal`; con comentario en español que explique que el cálculo es por horas exactas
+- [X] T031 [HU3] Añadir `estado_plazo` a `TareaSalida` en `app/esquemas.py` y calcularlo con `datetime.now(timezone.utc)` en `app/rutas_tareas.py` para cada tarea devuelta
 - [ ] T032 [HU3] En `app/static/app.js` y `app/static/estilos.css`, mostrar los indicadores «Vencida» y «Urgente» con texto e ícono además del color (accesibilidad), y volver a pedir el listado cada 60 segundos y al recuperar el foco de la pestaña para que las tareas cambien de estado con la aplicación abierta
 
 **Punto de control**: Las Historias 1 a 3 funcionan de forma independiente
