@@ -227,7 +227,7 @@ su rama) y lo integra cuanto antes para que el resto del equipo lo vea.
 |----------|------|-------------|--------|
 | HU1 – Materias (T010–T017) | — (hecha antes de esta regla) | — | Integrada en `main` |
 | HU2 – Tareas (T018–T027) | — (hecha antes de esta regla) | — | Integrada en `main` |
-| HU3 – Vencidas y urgentes (T028–T032) | `001-hu3-plazos` | maurocuba | En curso |
+| HU3 – Vencidas y urgentes (T028–T032) | `001-hu3-plazos` | maurocuba | En revisión (PR) |
 | HU4 – Completar tareas (T033–T037) | `001-hu4-completar` | *(sin asignar)* | Pendiente (empezar tras integrar HU3) |
 | HU5 – Filtros (T038–T042) | `001-hu5-filtros` | *(sin asignar)* | Pendiente |
 | Pulido (T043–T047) | `001-pulido` | *(sin asignar)* | Pendiente (al final) |
