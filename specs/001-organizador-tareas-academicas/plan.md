@@ -44,6 +44,8 @@ Enfoque técnico: un único proyecto Python con **FastAPI** que expone una API J
 
 **Restricciones académicas**: documentos y mensajes en español ✅; ejecutable y explicable en una presentación (un solo comando para arrancar) ✅.
 
+**Trabajo en equipo y control de versiones** (constitución v1.1.0): las historias pendientes (HU3 a HU5) y el pulido se desarrollan en ramas propias con un responsable cada una, según la sección "Responsables y ramas" de [tasks.md](tasks.md), que también señala los archivos compartidos donde hay riesgo de conflicto ✅; `.gitattributes` fija los finales de línea en LF ✅.
+
 **Resultado de la puerta**: sin violaciones; la tabla de Seguimiento de Complejidad no aplica. La verificación posterior al diseño (Fase 1) también pasa: el diseño no añadió capas ni dependencias.
 
 ## Estructura del Proyecto

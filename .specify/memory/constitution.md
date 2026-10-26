@@ -1,15 +1,13 @@
 <!--
 Informe de Impacto de Sincronización
-- Cambio de versión: plantilla (sin versión) → 1.0.0
-- Principios definidos (nuevos):
-  - I. Simplicidad Primero
-  - II. Pruebas Obligatorias (NO NEGOCIABLE)
-  - III. Código Legible
-  - IV. Validación de Entradas
-  - V. Accesible y Responsivo
-- Secciones añadidas: Restricciones del Proyecto Académico, Flujo de Desarrollo y Puertas de Calidad
+- Cambio de versión: 1.0.0 → 1.1.0 (MENOR: se agrega una sección nueva; no cambia ningún principio)
+- Principios modificados: ninguno
+- Secciones añadidas: Trabajo en Equipo y Control de Versiones
+- Secciones modificadas: Flujo de Desarrollo y Puertas de Calidad (nueva condición 5 de "terminada")
 - Secciones eliminadas: ninguna
-- Plantillas dependientes: no se modifican (leen la constitución en tiempo de ejecución)
+- Artefactos alineados: specs/001-organizador-tareas-academicas/plan.md (verificación de la
+  constitución) y tasks.md (ramas, responsables y archivos compartidos de las fases pendientes)
+- Archivos añadidos: `.gitattributes` (finales de línea LF, exigido por la nueva sección)
 - TODO pendientes: ninguno
 -->
 
@@ -87,7 +85,52 @@ interfaz que solo funciona en un tamaño de pantalla excluye a parte de ellos.
   1. cumple su especificación,
   2. tiene pruebas automatizadas que pasan,
   3. valida las entradas del usuario,
-  4. funciona en celular y en computadora.
+  4. funciona en celular y en computadora,
+  5. está integrada en `main` mediante una solicitud de integración (pull request) sin
+     conflictos pendientes y con todas las pruebas pasando.
+
+## Trabajo en Equipo y Control de Versiones
+
+El proyecto lo desarrollan varias personas sobre el mismo repositorio. Estas reglas existen
+para evitar conflictos de fusión (merge conflicts) y para que cada cambio se pueda revisar.
+
+- **Una rama por historia**: cada historia de usuario (o tarea transversal) DEBE desarrollarse
+  en su propia rama creada desde `main` actualizado, con el nombre
+  `<número de funcionalidad>-hu<N>-<descripción-corta>` (por ejemplo `001-hu3-plazos`).
+  Nadie DEBE trabajar directamente sobre `main`.
+- **Un responsable por historia**: cada historia DEBE tener una sola persona responsable a la
+  vez, registrada en la sección "Responsables" de `tasks.md` antes de empezar. Dos personas NO
+  DEBEN implementar a la vez historias que modifiquen las mismas funciones o secciones.
+- **Sincronizar seguido**: antes de empezar a trabajar y antes de abrir la solicitud de
+  integración, se DEBE incorporar el último `main` a la rama propia y ejecutar `pytest`.
+  Las ramas DEBEN integrarse pronto: una historia por solicitud de integración, sin acumular
+  varias.
+- **Commits pequeños**: un commit por tarea o grupo lógico, con el identificador de la tarea en
+  el mensaje (por ejemplo `T030: función calcular_estado_plazo`).
+- **Integración por revisión**: los cambios llegan a `main` solo mediante una solicitud de
+  integración revisada por otra persona del equipo. NO se DEBE usar `push --force` sobre `main`
+  ni reescribir historia ya compartida.
+- **Archivos compartidos**: en los archivos que tocan varias historias (`app/main.py`,
+  `app/esquemas.py`, `app/db.py`, `app/static/app.js`, `app/static/index.html`,
+  `app/static/estilos.css` y `tasks.md`), cada persona DEBE agregar su código en la sección
+  de su historia (o al final del archivo) y NO DEBE reordenar, renombrar ni reformatear código
+  ajeno. Los cambios de formato masivos o de reorganización DEBEN acordarse y hacerse en una
+  solicitud de integración propia, sin mezclarse con funcionalidad.
+- **`tasks.md`**: cada persona marca `[X]` solo en las tareas de su historia, dentro de su rama.
+  No se DEBEN reescribir ni renumerar tareas existentes; las tareas nuevas se agregan al final
+  de la fase correspondiente con el siguiente número libre.
+- **Documentos de especificación**: los cambios a la constitución, `spec.md`, `plan.md` y demás
+  documentos de diseño DEBEN ir en su propia solicitud de integración, separados del código.
+- **Archivos generados y finales de línea**: NO se DEBEN subir archivos generados (`.venv/`,
+  `datos/`, `__pycache__/`). El repositorio DEBE fijar finales de línea LF con
+  `.gitattributes`, para que Windows, macOS y Linux no generen diferencias falsas.
+- **Resolución de conflictos**: si aparece un conflicto, lo resuelve quien integra su rama,
+  conservando los cambios de ambas partes cuando correspondan, y DEBE volver a ejecutar
+  `pytest` antes de terminar la integración.
+
+**Justificación**: en un equipo académico los conflictos de fusión consumen tiempo y pueden
+borrar trabajo ajeno sin que nadie lo note; ramas cortas, responsables claros y cambios
+acotados los hacen raros y fáciles de resolver.
 
 ## Gobernanza
 
@@ -100,4 +143,4 @@ interfaz que solo funciona en un tamaño de pantalla excluye a parte de ellos.
 - Cada revisión de especificaciones, planes y código DEBE verificar el cumplimiento de estos
   principios; cualquier complejidad adicional DEBE justificarse por escrito.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-26
+**Version**: 1.1.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-26

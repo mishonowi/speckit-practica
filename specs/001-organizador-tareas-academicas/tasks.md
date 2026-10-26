@@ -205,7 +205,7 @@ Proyecto único (ver [plan.md](plan.md)): código en `app/`, pruebas en `tests/`
 - Fase 1: T003 y T004 en paralelo.
 - Fase 2: T006, T008 y T009 en paralelo tras T005 (T007 depende de T005).
 - Dentro de cada historia: todas las pruebas marcadas [P] pueden escribirse a la vez (archivos o secciones distintas).
-- Tras HU2, HU3, HU4 y HU5 pueden avanzar en paralelo en lo que no comparta archivos (`app/rutas_tareas.py`, `app/static/app.js`), coordinando los cambios.
+- Tras HU2, HU3 y HU5 pueden avanzar en paralelo en ramas distintas; HU4 conviene empezarla cuando HU3 ya esté integrada en `main`, porque ambas cambian cómo se dibuja cada tarea. Ver "Responsables y ramas" para los archivos compartidos.
 
 ### Ejemplo de paralelismo: Historia 1
 
@@ -214,6 +214,37 @@ Tarea: "Prueba de creación y listado de materias en tests/integration/test_mate
 Tarea: "Pruebas de error de materias en tests/integration/test_materias.py"               (T011)
 Tarea: "Pruebas de edición y borrado de materias en tests/integration/test_materias.py"   (T012)
 ```
+
+---
+
+## Responsables y ramas
+
+Según la sección "Trabajo en Equipo y Control de Versiones" de la constitución: una rama y un
+responsable por historia. Antes de empezar una historia, la persona escribe su nombre aquí (en
+su rama) y lo integra cuanto antes para que el resto del equipo lo vea.
+
+| Historia | Rama | Responsable | Estado |
+|----------|------|-------------|--------|
+| HU1 – Materias (T010–T017) | — (hecha antes de esta regla) | — | Integrada en `main` |
+| HU2 – Tareas (T018–T027) | — (hecha antes de esta regla) | — | Integrada en `main` |
+| HU3 – Vencidas y urgentes (T028–T032) | `001-hu3-plazos` | *(sin asignar)* | Pendiente |
+| HU4 – Completar tareas (T033–T037) | `001-hu4-completar` | *(sin asignar)* | Pendiente (empezar tras integrar HU3) |
+| HU5 – Filtros (T038–T042) | `001-hu5-filtros` | *(sin asignar)* | Pendiente |
+| Pulido (T043–T047) | `001-pulido` | *(sin asignar)* | Pendiente (al final) |
+
+### Archivos compartidos y dónde hay riesgo de conflicto
+
+| Archivo | Lo modifican | Cómo evitar el conflicto |
+|---------|--------------|--------------------------|
+| `tests/integration/test_tareas.py` | HU3, HU4, HU5 | Cada historia agrega sus pruebas **al final** del archivo, bajo un comentario `# --- HUx ---` propio. |
+| `app/rutas_tareas.py` → `listar()` | HU3 (`estado_plazo`), HU5 (filtros) | HU3 calcula `estado_plazo` en una función auxiliar aparte; HU5 solo cambia la firma de `listar()` y la llamada a `db`. |
+| `app/rutas_tareas.py` (resto) | HU4 | El endpoint `PATCH` se agrega al final del archivo. |
+| `app/esquemas.py` | HU3 (`TareaSalida`), HU4 (modelo nuevo) | HU4 agrega su modelo al final; no se reordenan los existentes. |
+| `app/db.py` | HU4 (función nueva), HU5 (`listar_tareas`) | HU4 agrega al final; HU5 modifica solo `listar_tareas`. |
+| `app/static/app.js` → `dibujarTarea()` | HU3 (indicadores), HU4 (casilla) | Por eso HU4 empieza después de integrar HU3. |
+| `app/static/app.js` → `cargarTareas()` | HU3 (refresco cada 60 s), HU5 (filtros) | HU5 arma la URL con filtros en una función nueva y solo cambia la ruta usada en `cargarTareas()`. |
+| `app/static/index.html`, `estilos.css` | HU3, HU4, HU5 | Cada historia agrega sus elementos y estilos en un bloque propio con comentario `HUx`. |
+| `tasks.md` | Todas | Marcar `[X]` solo en las tareas propias; no reescribir ni renumerar. |
 
 ---
 
@@ -245,5 +276,6 @@ Tarea: "Pruebas de edición y borrado de materias en tests/integration/test_mate
 - La etiqueta [HUx] enlaza la tarea con su historia para trazabilidad.
 - Cada historia debe poder completarse y probarse por separado.
 - Verificar que las pruebas fallan antes de implementar.
-- Hacer commit tras cada tarea o grupo lógico.
+- Hacer commit tras cada tarea o grupo lógico, con el ID de la tarea en el mensaje (por ejemplo `T030: ...`).
+- Antes de empezar y antes de abrir la solicitud de integración: traer el último `main` a la rama propia y ejecutar `pytest`.
 - Evitar: tareas vagas, conflictos en el mismo archivo, dependencias entre historias que rompan su independencia.
