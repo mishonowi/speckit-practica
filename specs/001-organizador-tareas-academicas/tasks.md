@@ -84,19 +84,19 @@ Proyecto único (ver [plan.md](plan.md)): código en `app/`, pruebas en `tests/`
 
 ### Pruebas de la Historia 2 (escribir primero; deben fallar)
 
-- [ ] T018 [P] [HU2] Prueba de integración en `tests/integration/test_tareas.py`: crear tarea válida (con y sin descripción) devuelve 201 con `materia_nombre` y `materia_color`; la descripción vacía se guarda como `null`
-- [ ] T019 [P] [HU2] Prueba en `tests/integration/test_tareas.py`: `GET /api/tareas` devuelve las tareas ordenadas por `fecha_entrega` ascendente, con desempate por `id` ascendente
-- [ ] T020 [P] [HU2] Pruebas de error en `tests/integration/test_tareas.py`: título vacío/solo espacios → 422; título de 101 caracteres → 422; descripción de 501 caracteres → 422; fecha de entrega sin zona horaria → 422; materia inexistente → 422; falta de título, materia o fecha → 422 con el campo indicado; fecha pasada → 201 (se permite)
-- [ ] T021 [P] [HU2] Pruebas en `tests/integration/test_tareas.py` de edición (`PUT`), borrado (`DELETE` → 204), tarea inexistente → 404, y borrado en cascada: al borrar una materia con 2 tareas se eliminan también sus tareas
+- [X] T018 [P] [HU2] Prueba de integración en `tests/integration/test_tareas.py`: crear tarea válida (con y sin descripción) devuelve 201 con `materia_nombre` y `materia_color`; la descripción vacía se guarda como `null`
+- [X] T019 [P] [HU2] Prueba en `tests/integration/test_tareas.py`: `GET /api/tareas` devuelve las tareas ordenadas por `fecha_entrega` ascendente, con desempate por `id` ascendente
+- [X] T020 [P] [HU2] Pruebas de error en `tests/integration/test_tareas.py`: título vacío/solo espacios → 422; título de 101 caracteres → 422; descripción de 501 caracteres → 422; fecha de entrega sin zona horaria → 422; materia inexistente → 422; falta de título, materia o fecha → 422 con el campo indicado; fecha pasada → 201 (se permite)
+- [X] T021 [P] [HU2] Pruebas en `tests/integration/test_tareas.py` de edición (`PUT`), borrado (`DELETE` → 204), tarea inexistente → 404, y borrado en cascada: al borrar una materia con 2 tareas se eliminan también sus tareas
 
 ### Implementación de la Historia 2
 
-- [ ] T022 [HU2] En `app/esquemas.py`, crear `TareaEntrada` (`materia_id`: obligatorio; `titulo`: obligatorio, se recortan espacios, no vacío, máximo 100 caracteres; `descripcion`: opcional, máximo 500 caracteres, vacía → nula; `fecha_entrega`: obligatoria, ISO 8601 con zona horaria, se convierte a UTC) y `TareaSalida` (`id`, `materia_id`, `materia_nombre`, `materia_color`, `titulo`, `descripcion`, `fecha_entrega` en UTC con sufijo `Z`, `completada`), con mensajes de error en español
-- [ ] T023 [HU2] En `app/db.py`, añadir funciones de tareas con SQL parametrizado: listar con JOIN a materia ordenando por `fecha_entrega` ASC y `id` ASC, obtener por id, crear (verificando que la materia exista), actualizar y borrar
-- [ ] T024 [HU2] Crear `app/rutas_tareas.py` con el router `/api/tareas` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`) según [contracts/api.md](contracts/api.md); registrar el router en `app/main.py`
-- [ ] T025 [HU2] En `app/static/index.html` y `app/static/app.js`, implementar el formulario de tarea (materia, título, descripción opcional, fecha y hora de entrega; la fecha se envía con el desplazamiento horario del dispositivo; si solo se elige el día, usar las 23:59 locales) con etiquetas accesibles, contadores de 100 y 500 caracteres, conservación de lo escrito ante errores y mensaje que guía a registrar una materia si no existe ninguna
-- [ ] T026 [HU2] En `app/static/app.js` y `app/static/estilos.css`, implementar el listado de tareas: título, materia con su color, fecha y hora en hora local y formato en español; estado vacío «Aún no tienes tareas…»; botones editar y borrar tarea (con confirmación al borrar); y actualización inmediata del listado tras crear, editar o borrar
-- [ ] T027 [HU2] En `app/static/app.js`, mostrar un mensaje claro cuando la API no responda o falle el guardado, sin perder los datos del formulario
+- [X] T022 [HU2] En `app/esquemas.py`, crear `TareaEntrada` (`materia_id`: obligatorio; `titulo`: obligatorio, se recortan espacios, no vacío, máximo 100 caracteres; `descripcion`: opcional, máximo 500 caracteres, vacía → nula; `fecha_entrega`: obligatoria, ISO 8601 con zona horaria, se convierte a UTC) y `TareaSalida` (`id`, `materia_id`, `materia_nombre`, `materia_color`, `titulo`, `descripcion`, `fecha_entrega` en UTC con sufijo `Z`, `completada`), con mensajes de error en español
+- [X] T023 [HU2] En `app/db.py`, añadir funciones de tareas con SQL parametrizado: listar con JOIN a materia ordenando por `fecha_entrega` ASC y `id` ASC, obtener por id, crear (verificando que la materia exista), actualizar y borrar
+- [X] T024 [HU2] Crear `app/rutas_tareas.py` con el router `/api/tareas` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`) según [contracts/api.md](contracts/api.md); registrar el router en `app/main.py`
+- [X] T025 [HU2] En `app/static/index.html` y `app/static/app.js`, implementar el formulario de tarea (materia, título, descripción opcional, fecha y hora de entrega; la fecha se envía con el desplazamiento horario del dispositivo; si solo se elige el día, usar las 23:59 locales) con etiquetas accesibles, contadores de 100 y 500 caracteres, conservación de lo escrito ante errores y mensaje que guía a registrar una materia si no existe ninguna
+- [X] T026 [HU2] En `app/static/app.js` y `app/static/estilos.css`, implementar el listado de tareas: título, materia con su color, fecha y hora en hora local y formato en español; estado vacío «Aún no tienes tareas…»; botones editar y borrar tarea (con confirmación al borrar); y actualización inmediata del listado tras crear, editar o borrar
+- [X] T027 [HU2] En `app/static/app.js`, mostrar un mensaje claro cuando la API no responda o falle el guardado, sin perder los datos del formulario
 
 **Punto de control**: Las Historias 1 y 2 funcionan juntas (MVP completo)
 
@@ -205,7 +205,7 @@ Proyecto único (ver [plan.md](plan.md)): código en `app/`, pruebas en `tests/`
 - Fase 1: T003 y T004 en paralelo.
 - Fase 2: T006, T008 y T009 en paralelo tras T005 (T007 depende de T005).
 - Dentro de cada historia: todas las pruebas marcadas [P] pueden escribirse a la vez (archivos o secciones distintas).
-- Tras HU2, HU3, HU4 y HU5 pueden avanzar en paralelo en lo que no comparta archivos (`app/rutas_tareas.py`, `app/static/app.js`), coordinando los cambios.
+- Tras HU2, HU3 y HU5 pueden avanzar en paralelo en ramas distintas; HU4 conviene empezarla cuando HU3 ya esté integrada en `main`, porque ambas cambian cómo se dibuja cada tarea. Ver "Responsables y ramas" para los archivos compartidos.
 
 ### Ejemplo de paralelismo: Historia 1
 
@@ -214,6 +214,37 @@ Tarea: "Prueba de creación y listado de materias en tests/integration/test_mate
 Tarea: "Pruebas de error de materias en tests/integration/test_materias.py"               (T011)
 Tarea: "Pruebas de edición y borrado de materias en tests/integration/test_materias.py"   (T012)
 ```
+
+---
+
+## Responsables y ramas
+
+Según la sección "Trabajo en Equipo y Control de Versiones" de la constitución: una rama y un
+responsable por historia. Antes de empezar una historia, la persona escribe su nombre aquí (en
+su rama) y lo integra cuanto antes para que el resto del equipo lo vea.
+
+| Historia | Rama | Responsable | Estado |
+|----------|------|-------------|--------|
+| HU1 – Materias (T010–T017) | — (hecha antes de esta regla) | — | Integrada en `main` |
+| HU2 – Tareas (T018–T027) | — (hecha antes de esta regla) | — | Integrada en `main` |
+| HU3 – Vencidas y urgentes (T028–T032) | `001-hu3-plazos` | *(sin asignar)* | Pendiente |
+| HU4 – Completar tareas (T033–T037) | `001-hu4-completar` | *(sin asignar)* | Pendiente (empezar tras integrar HU3) |
+| HU5 – Filtros (T038–T042) | `001-hu5-filtros` | *(sin asignar)* | Pendiente |
+| Pulido (T043–T047) | `001-pulido` | *(sin asignar)* | Pendiente (al final) |
+
+### Archivos compartidos y dónde hay riesgo de conflicto
+
+| Archivo | Lo modifican | Cómo evitar el conflicto |
+|---------|--------------|--------------------------|
+| `tests/integration/test_tareas.py` | HU3, HU4, HU5 | Cada historia agrega sus pruebas **al final** del archivo, bajo un comentario `# --- HUx ---` propio. |
+| `app/rutas_tareas.py` → `listar()` | HU3 (`estado_plazo`), HU5 (filtros) | HU3 calcula `estado_plazo` en una función auxiliar aparte; HU5 solo cambia la firma de `listar()` y la llamada a `db`. |
+| `app/rutas_tareas.py` (resto) | HU4 | El endpoint `PATCH` se agrega al final del archivo. |
+| `app/esquemas.py` | HU3 (`TareaSalida`), HU4 (modelo nuevo) | HU4 agrega su modelo al final; no se reordenan los existentes. |
+| `app/db.py` | HU4 (función nueva), HU5 (`listar_tareas`) | HU4 agrega al final; HU5 modifica solo `listar_tareas`. |
+| `app/static/app.js` → `dibujarTarea()` | HU3 (indicadores), HU4 (casilla) | Por eso HU4 empieza después de integrar HU3. |
+| `app/static/app.js` → `cargarTareas()` | HU3 (refresco cada 60 s), HU5 (filtros) | HU5 arma la URL con filtros en una función nueva y solo cambia la ruta usada en `cargarTareas()`. |
+| `app/static/index.html`, `estilos.css` | HU3, HU4, HU5 | Cada historia agrega sus elementos y estilos en un bloque propio con comentario `HUx`. |
+| `tasks.md` | Todas | Marcar `[X]` solo en las tareas propias; no reescribir ni renumerar. |
 
 ---
 
@@ -245,5 +276,6 @@ Tarea: "Pruebas de edición y borrado de materias en tests/integration/test_mate
 - La etiqueta [HUx] enlaza la tarea con su historia para trazabilidad.
 - Cada historia debe poder completarse y probarse por separado.
 - Verificar que las pruebas fallan antes de implementar.
-- Hacer commit tras cada tarea o grupo lógico.
+- Hacer commit tras cada tarea o grupo lógico, con el ID de la tarea en el mensaje (por ejemplo `T030: ...`).
+- Antes de empezar y antes de abrir la solicitud de integración: traer el último `main` a la rama propia y ejecutar `pytest`.
 - Evitar: tareas vagas, conflictos en el mismo archivo, dependencias entre historias que rompan su independencia.

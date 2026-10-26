@@ -1,0 +1,6 @@
+# Finales de línea LF en el repositorio y en la copia de trabajo, en cualquier sistema operativo,
+# para evitar diferencias falsas y conflictos de fusión (constitución, "Trabajo en Equipo").
+* text=auto eol=lf
+
+# Los scripts de PowerShell de Spec Kit se usan en Windows: se mantienen con CRLF.
+*.ps1 text eol=crlf

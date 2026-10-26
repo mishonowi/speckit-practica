@@ -102,3 +102,60 @@ def borrar_materia(materia_id: int) -> None:
     # Las tareas de la materia se eliminan por ON DELETE CASCADE.
     with conectar() as conexion:
         conexion.execute("DELETE FROM materia WHERE id = ?", (materia_id,))
+
+
+# --- Tareas -----------------------------------------------------------------
+
+_SELECT_TAREA = """
+    SELECT t.id, t.materia_id, m.nombre AS materia_nombre, m.color AS materia_color,
+           t.titulo, t.descripcion, t.fecha_entrega, t.completada
+    FROM tarea t JOIN materia m ON m.id = t.materia_id
+"""
+
+
+def _tarea_desde_fila(fila: sqlite3.Row) -> dict:
+    tarea = dict(fila)
+    tarea["completada"] = bool(tarea["completada"])
+    return tarea
+
+
+def listar_tareas() -> list[dict]:
+    # fecha_entrega se guarda siempre como "AAAA-MM-DDTHH:MM:SSZ", así que el orden
+    # de texto coincide con el cronológico.
+    with conectar() as conexion:
+        filas = conexion.execute(
+            _SELECT_TAREA + " ORDER BY t.fecha_entrega ASC, t.id ASC"
+        ).fetchall()
+    return [_tarea_desde_fila(fila) for fila in filas]
+
+
+def obtener_tarea(tarea_id: int) -> dict | None:
+    with conectar() as conexion:
+        fila = conexion.execute(_SELECT_TAREA + " WHERE t.id = ?", (tarea_id,)).fetchone()
+    return _tarea_desde_fila(fila) if fila else None
+
+
+def crear_tarea(materia_id: int, titulo: str, descripcion: str | None, fecha_entrega: str) -> int:
+    # Quien llama verifica antes que la materia exista (para responder 422 con el campo).
+    with conectar() as conexion:
+        cursor = conexion.execute(
+            "INSERT INTO tarea (materia_id, titulo, descripcion, fecha_entrega) VALUES (?, ?, ?, ?)",
+            (materia_id, titulo, descripcion, fecha_entrega),
+        )
+        return cursor.lastrowid
+
+
+def actualizar_tarea(
+    tarea_id: int, materia_id: int, titulo: str, descripcion: str | None, fecha_entrega: str
+) -> None:
+    with conectar() as conexion:
+        conexion.execute(
+            """UPDATE tarea SET materia_id = ?, titulo = ?, descripcion = ?, fecha_entrega = ?
+               WHERE id = ?""",
+            (materia_id, titulo, descripcion, fecha_entrega, tarea_id),
+        )
+
+
+def borrar_tarea(tarea_id: int) -> None:
+    with conectar() as conexion:
+        conexion.execute("DELETE FROM tarea WHERE id = ?", (tarea_id,))
