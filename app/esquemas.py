@@ -102,3 +102,5 @@ class TareaSalida(BaseModel):
     descripcion: str | None
     fecha_entrega: str
     completada: bool
+    # Calculado en cada consulta, no se almacena: "vencida" | "urgente" | "normal" | "ninguno".
+    estado_plazo: str

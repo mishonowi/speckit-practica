@@ -294,3 +294,29 @@ textarea {
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
+
+/* --- HU3: vencidas y urgentes --- */
+.indicador-plazo {
+  display: inline-block;
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* Texto oscuro sobre fondo claro: contraste suficiente (≥ 4.5:1) en ambos casos. */
+.tarea-vencida .indicador-plazo {
+  color: var(--vencida);
+  background: #fdecea;
+}
+
+.tarea-urgente .indicador-plazo {
+  color: var(--urgente);
+  background: #fff4e0;
+}
+
+/* La tarea vencida se destaca también con el fondo de toda la tarjeta. */
+.tarea-vencida {
+  background: #fff7f6;
+}

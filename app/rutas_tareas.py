@@ -1,9 +1,12 @@
 """Endpoints de tareas bajo /api/tareas."""
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, HTTPException, Response
 from fastapi.exceptions import RequestValidationError
 
 from app import db
 from app.esquemas import TareaEntrada, TareaSalida, fecha_a_texto_utc
+from app.plazo import calcular_estado_plazo
 
 router = APIRouter(prefix="/api/tareas", tags=["tareas"])
 
@@ -35,9 +38,19 @@ def _exigir_materia(materia_id: int) -> None:
         )
 
 
+def _con_estado_plazo(tarea: dict, ahora: datetime | None = None) -> dict:
+    """Añade estado_plazo a una tarea leída de la base, según el momento actual."""
+    ahora = ahora or datetime.now(timezone.utc)
+    # fecha_entrega se guarda como "AAAA-MM-DDTHH:MM:SSZ"; fromisoformat entiende la Z.
+    fecha_entrega = datetime.fromisoformat(tarea["fecha_entrega"])
+    return {**tarea, "estado_plazo": calcular_estado_plazo(fecha_entrega, tarea["completada"], ahora)}
+
+
 @router.get("", response_model=list[TareaSalida])
 def listar():
-    return db.listar_tareas()
+    # Un único "ahora" para todo el listado, así todas las tareas se comparan con el mismo instante.
+    ahora = datetime.now(timezone.utc)
+    return [_con_estado_plazo(tarea, ahora) for tarea in db.listar_tareas()]
 
 
 @router.post("", response_model=TareaSalida, status_code=201)
@@ -46,7 +59,7 @@ def crear(datos: TareaEntrada):
     tarea_id = db.crear_tarea(
         datos.materia_id, datos.titulo, datos.descripcion, fecha_a_texto_utc(datos.fecha_entrega)
     )
-    return db.obtener_tarea(tarea_id)
+    return _con_estado_plazo(db.obtener_tarea(tarea_id))
 
 
 @router.put("/{tarea_id}", response_model=TareaSalida)
@@ -60,7 +73,7 @@ def editar(tarea_id: int, datos: TareaEntrada):
         datos.descripcion,
         fecha_a_texto_utc(datos.fecha_entrega),
     )
-    return db.obtener_tarea(tarea_id)
+    return _con_estado_plazo(db.obtener_tarea(tarea_id))
 
 
 @router.delete("/{tarea_id}", status_code=204)
