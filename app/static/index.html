@@ -13,7 +13,7 @@
   </header>
 
   <main class="contenido">
-    <!-- Mensaje general de errores de comunicación (se completa en la Historia 2). -->
+    <!-- Mensaje general cuando no se puede cargar la información de la API. -->
     <p id="aviso" class="aviso" role="alert" hidden></p>
 
     <section id="seccion-materias" aria-labelledby="titulo-materias">
@@ -44,7 +44,53 @@
 
     <section id="seccion-tareas" aria-labelledby="titulo-tareas">
       <h2 id="titulo-tareas">Tareas</h2>
-      <!-- Formulario, filtros y listado de tareas: Historias 2 a 5. -->
+      <p id="tareas-sin-materias" class="vacio" hidden>Primero registra una materia para poder crear tareas.</p>
+      <form id="form-tarea" novalidate>
+        <input type="hidden" id="tarea-id">
+        <fieldset id="tarea-campos" class="campo">
+          <legend class="solo-lectores">Datos de la tarea</legend>
+          <div class="campo">
+            <label for="tarea-materia">Materia</label>
+            <select id="tarea-materia" aria-describedby="tarea-materia-error" required></select>
+            <p id="tarea-materia-error" class="error-campo" role="alert"></p>
+          </div>
+          <div class="campo">
+            <label for="tarea-titulo">Título</label>
+            <input id="tarea-titulo" type="text" maxlength="100" autocomplete="off"
+                   aria-describedby="tarea-titulo-ayuda tarea-titulo-error" required>
+            <p id="tarea-titulo-ayuda" class="ayuda">Máximo 100 caracteres. <span id="tarea-titulo-contador">0/100</span></p>
+            <p id="tarea-titulo-error" class="error-campo" role="alert"></p>
+          </div>
+          <div class="campo">
+            <label for="tarea-descripcion">Descripción (opcional)</label>
+            <textarea id="tarea-descripcion" rows="3" maxlength="500"
+                      aria-describedby="tarea-descripcion-ayuda tarea-descripcion-error"></textarea>
+            <p id="tarea-descripcion-ayuda" class="ayuda">Máximo 500 caracteres. <span id="tarea-descripcion-contador">0/500</span></p>
+            <p id="tarea-descripcion-error" class="error-campo" role="alert"></p>
+          </div>
+          <div class="fila-fecha">
+            <div class="campo">
+              <label for="tarea-fecha">Fecha de entrega</label>
+              <input id="tarea-fecha" type="date" aria-describedby="tarea-fecha-error" required>
+            </div>
+            <div class="campo">
+              <label for="tarea-hora">Hora (opcional)</label>
+              <input id="tarea-hora" type="time" aria-describedby="tarea-hora-ayuda">
+              <p id="tarea-hora-ayuda" class="ayuda">Si no eliges hora, se usa 23:59.</p>
+            </div>
+          </div>
+          <p id="tarea-fecha-error" class="error-campo" role="alert"></p>
+          <p id="tarea-error" class="error-campo" role="alert"></p>
+          <div class="acciones">
+            <button type="submit" id="tarea-guardar">Agregar tarea</button>
+            <button type="button" id="tarea-cancelar" class="secundario" hidden>Cancelar edición</button>
+          </div>
+        </fieldset>
+      </form>
+
+      <h3 id="titulo-listado">Próximas entregas</h3>
+      <p id="tareas-vacio" class="vacio" hidden>Aún no tienes tareas. Crea la primera con el formulario de arriba.</p>
+      <ul id="lista-tareas" class="lista" aria-labelledby="titulo-listado"></ul>
     </section>
   </main>
 

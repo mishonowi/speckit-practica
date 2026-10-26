@@ -1,4 +1,6 @@
 """Modelos de entrada/salida y utilidades de validación."""
+from datetime import datetime, timezone
+
 from pydantic import BaseModel, Field, field_validator
 
 # Paleta fija de colores de materia (formato #RRGGBB), ver data-model.md.
@@ -44,3 +46,59 @@ class MateriaSalida(BaseModel):
     nombre: str
     color: str
     total_tareas: int
+
+
+def fecha_a_texto_utc(fecha: datetime) -> str:
+    """Formato único de almacenamiento: UTC con sufijo Z y precisión de segundos.
+
+    Al tener todas las fechas el mismo formato, ordenarlas como texto en SQLite
+    equivale a ordenarlas cronológicamente.
+    """
+    return fecha.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+class TareaEntrada(BaseModel):
+    """Datos que el estudiante envía para crear o editar una tarea."""
+
+    materia_id: int
+    titulo: str = Field(min_length=1, max_length=100)
+    descripcion: str | None = Field(default=None, max_length=500)
+    fecha_entrega: datetime
+
+    @field_validator("titulo", mode="before")
+    @classmethod
+    def _recortar_titulo(cls, valor):
+        return recortar(valor)
+
+    @field_validator("descripcion", mode="before")
+    @classmethod
+    def _descripcion_vacia_es_nula(cls, valor):
+        valor = recortar(valor)
+        return valor or None
+
+    @field_validator("fecha_entrega", mode="before")
+    @classmethod
+    def _fecha_como_texto(cls, valor):
+        # Pydantic aceptaría también números (segundos desde 1970); el contrato pide ISO 8601.
+        if not isinstance(valor, str):
+            raise ValueError("La fecha debe tener formato ISO 8601, por ejemplo 2026-11-05T18:00:00-04:00.")
+        return valor
+
+    @field_validator("fecha_entrega")
+    @classmethod
+    def _fecha_con_zona_horaria(cls, valor: datetime):
+        # Sin zona horaria no se puede saber a qué momento exacto se refiere (regla de 48 horas).
+        if valor.tzinfo is None:
+            raise ValueError("La fecha debe incluir la zona horaria.")
+        return valor
+
+
+class TareaSalida(BaseModel):
+    id: int
+    materia_id: int
+    materia_nombre: str
+    materia_color: str
+    titulo: str
+    descripcion: str | None
+    fecha_entrega: str
+    completada: bool

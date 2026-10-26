@@ -173,6 +173,7 @@ async function cargarMaterias() {
   try {
     materias = await api("GET", "/api/materias");
     dibujarMaterias();
+    dibujarSelectorMaterias();
   } catch (error) {
     errorMateria.textContent = error.message;
   }
@@ -214,7 +215,8 @@ async function guardarMateria(evento) {
       await api("POST", "/api/materias", { nombre, color });
     }
     reiniciarFormularioMateria();
-    await cargarMaterias();
+    // Las tareas muestran el nombre y color de su materia: se recargan ambas listas.
+    await recargarTodo();
   } catch (error) {
     // Se conserva lo escrito en el formulario para que el estudiante lo corrija.
     const campos = error.campos || {};
@@ -245,7 +247,8 @@ async function borrarMateria(materia) {
     if (campoMateriaId.value === String(materia.id)) {
       reiniciarFormularioMateria();
     }
-    await cargarMaterias();
+    // El borrado elimina también sus tareas (cascada): se recargan ambas listas.
+    await recargarTodo();
   } catch (error) {
     errorMateria.textContent = error.message;
   }
@@ -256,4 +259,299 @@ actualizarContadorNombre();
 campoNombre.addEventListener("input", actualizarContadorNombre);
 formMateria.addEventListener("submit", guardarMateria);
 botonCancelarMateria.addEventListener("click", reiniciarFormularioMateria);
-cargarMaterias();
+
+// ---------------------------------------------------------------------------
+// Tareas (Historia 2)
+// ---------------------------------------------------------------------------
+
+const LIMITE_TITULO = 100;
+const LIMITE_DESCRIPCION = 500;
+// Si el estudiante elige solo el día, la entrega es al final de ese día (hora local).
+const HORA_POR_DEFECTO = "23:59";
+
+let tareas = [];
+
+const formTarea = document.getElementById("form-tarea");
+const camposTarea = document.getElementById("tarea-campos");
+const campoTareaId = document.getElementById("tarea-id");
+const campoTareaMateria = document.getElementById("tarea-materia");
+const campoTitulo = document.getElementById("tarea-titulo");
+const campoDescripcion = document.getElementById("tarea-descripcion");
+const campoFecha = document.getElementById("tarea-fecha");
+const campoHora = document.getElementById("tarea-hora");
+const contadorTitulo = document.getElementById("tarea-titulo-contador");
+const contadorDescripcion = document.getElementById("tarea-descripcion-contador");
+const errorTareaMateria = document.getElementById("tarea-materia-error");
+const errorTitulo = document.getElementById("tarea-titulo-error");
+const errorDescripcion = document.getElementById("tarea-descripcion-error");
+const errorFecha = document.getElementById("tarea-fecha-error");
+const errorTarea = document.getElementById("tarea-error");
+const botonGuardarTarea = document.getElementById("tarea-guardar");
+const botonCancelarTarea = document.getElementById("tarea-cancelar");
+const avisoSinMaterias = document.getElementById("tareas-sin-materias");
+const listaTareas = document.getElementById("lista-tareas");
+const avisoVacioTareas = document.getElementById("tareas-vacio");
+const aviso = document.getElementById("aviso");
+
+const formatoFecha = new Intl.DateTimeFormat("es", {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+function dosDigitos(numero) {
+  return String(numero).padStart(2, "0");
+}
+
+/**
+ * Convierte la fecha ("AAAA-MM-DD") y la hora ("HH:MM") elegidas en el formulario
+ * a ISO 8601 con el desplazamiento horario del dispositivo, p. ej. "2026-11-05T18:00:00-04:00".
+ * El desplazamiento se calcula para esa fecha concreta (por si hay horario de verano).
+ */
+function fechaConDesplazamiento(fecha, hora) {
+  const [anio, mes, dia] = fecha.split("-").map(Number);
+  const [horas, minutos] = hora.split(":").map(Number);
+  const local = new Date(anio, mes - 1, dia, horas, minutos);
+  const desplazamiento = -local.getTimezoneOffset(); // en minutos; Bolivia = -240
+  const signo = desplazamiento >= 0 ? "+" : "-";
+  const absoluto = Math.abs(desplazamiento);
+  return (
+    `${fecha}T${hora}:00` +
+    `${signo}${dosDigitos(Math.floor(absoluto / 60))}:${dosDigitos(absoluto % 60)}`
+  );
+}
+
+/** Separa una fecha UTC de la API en día y hora locales para el formulario. */
+function partesLocales(fechaUtc) {
+  const fecha = new Date(fechaUtc);
+  return {
+    dia: `${fecha.getFullYear()}-${dosDigitos(fecha.getMonth() + 1)}-${dosDigitos(fecha.getDate())}`,
+    hora: `${dosDigitos(fecha.getHours())}:${dosDigitos(fecha.getMinutes())}`,
+  };
+}
+
+function mostrarAviso(mensaje) {
+  aviso.textContent = mensaje;
+  aviso.hidden = !mensaje;
+}
+
+function actualizarContadoresTarea() {
+  contadorTitulo.textContent = `${campoTitulo.value.length}/${LIMITE_TITULO}`;
+  contadorDescripcion.textContent = `${campoDescripcion.value.length}/${LIMITE_DESCRIPCION}`;
+}
+
+function limpiarErroresTarea() {
+  [errorTareaMateria, errorTitulo, errorDescripcion, errorFecha, errorTarea].forEach((p) => {
+    p.textContent = "";
+  });
+}
+
+function reiniciarFormularioTarea() {
+  formTarea.reset();
+  campoTareaId.value = "";
+  botonGuardarTarea.textContent = "Agregar tarea";
+  botonCancelarTarea.hidden = true;
+  limpiarErroresTarea();
+  actualizarContadoresTarea();
+}
+
+/** Rellena el selector de materias conservando la opción elegida si sigue existiendo. */
+function dibujarSelectorMaterias() {
+  const elegida = campoTareaMateria.value;
+  const vacia = new Option("Elige una materia", "");
+  const opciones = materias.map((m) => new Option(m.nombre, String(m.id)));
+  campoTareaMateria.replaceChildren(vacia, ...opciones);
+  if (materias.some((m) => String(m.id) === elegida)) {
+    campoTareaMateria.value = elegida;
+  }
+
+  // Sin materias no se puede crear ninguna tarea: se guía al estudiante.
+  const sinMaterias = materias.length === 0;
+  avisoSinMaterias.hidden = !sinMaterias;
+  camposTarea.disabled = sinMaterias;
+}
+
+function crearBoton(texto, etiqueta, alHacerClic) {
+  const boton = document.createElement("button");
+  boton.type = "button";
+  boton.className = "secundario";
+  boton.textContent = texto;
+  boton.setAttribute("aria-label", etiqueta);
+  boton.addEventListener("click", alHacerClic);
+  return boton;
+}
+
+function dibujarTarea(tarea) {
+  const item = document.createElement("li");
+  item.className = "tarea-item";
+  // La franja izquierda repite el color de la materia para reconocerla de un vistazo.
+  item.style.setProperty("--color-materia", tarea.materia_color);
+
+  const cabecera = document.createElement("div");
+  cabecera.className = "tarea-cabecera";
+
+  const titulo = document.createElement("h4");
+  titulo.className = "tarea-titulo";
+  titulo.textContent = tarea.titulo;
+
+  const chip = document.createElement("span");
+  chip.className = "materia-chip tarea-materia";
+  chip.textContent = tarea.materia_nombre;
+  chip.style.background = tarea.materia_color;
+  chip.style.color = colorPorValor(tarea.materia_color).texto;
+
+  cabecera.append(titulo, chip);
+
+  const fecha = document.createElement("p");
+  fecha.className = "tarea-fecha";
+  const tiempo = document.createElement("time");
+  tiempo.dateTime = tarea.fecha_entrega;
+  tiempo.textContent = formatoFecha.format(new Date(tarea.fecha_entrega));
+  fecha.append("Entrega: ", tiempo);
+
+  item.append(cabecera, fecha);
+
+  if (tarea.descripcion) {
+    const descripcion = document.createElement("p");
+    descripcion.className = "tarea-descripcion";
+    descripcion.textContent = tarea.descripcion;
+    item.append(descripcion);
+  }
+
+  const acciones = document.createElement("div");
+  acciones.className = "acciones";
+  acciones.append(
+    crearBoton("Editar", `Editar la tarea ${tarea.titulo}`, () => empezarEdicionTarea(tarea)),
+    crearBoton("Borrar", `Borrar la tarea ${tarea.titulo}`, () => borrarTarea(tarea))
+  );
+  item.append(acciones);
+
+  return item;
+}
+
+function dibujarTareas() {
+  avisoVacioTareas.hidden = tareas.length > 0;
+  listaTareas.replaceChildren(...tareas.map(dibujarTarea));
+}
+
+async function cargarTareas() {
+  try {
+    tareas = await api("GET", "/api/tareas");
+    mostrarAviso("");
+    dibujarTareas();
+    // Si la tarea en edición ya no existe (p. ej. se borró su materia), se cierra la edición.
+    if (campoTareaId.value && !tareas.some((t) => String(t.id) === campoTareaId.value)) {
+      reiniciarFormularioTarea();
+    }
+  } catch (error) {
+    mostrarAviso(`No se pudieron cargar las tareas. ${error.message}`);
+  }
+}
+
+async function recargarTodo() {
+  await Promise.all([cargarMaterias(), cargarTareas()]);
+}
+
+function empezarEdicionTarea(tarea) {
+  limpiarErroresTarea();
+  const { dia, hora } = partesLocales(tarea.fecha_entrega);
+  campoTareaId.value = tarea.id;
+  campoTareaMateria.value = String(tarea.materia_id);
+  campoTitulo.value = tarea.titulo;
+  campoDescripcion.value = tarea.descripcion || "";
+  campoFecha.value = dia;
+  campoHora.value = hora;
+  botonGuardarTarea.textContent = "Guardar cambios";
+  botonCancelarTarea.hidden = false;
+  actualizarContadoresTarea();
+  campoTitulo.focus();
+}
+
+/** Comprobación inmediata en pantalla; devuelve el primer campo con error o null. */
+function validarFormularioTarea() {
+  let primerError = null;
+  const marcar = (campo, parrafo, mensaje) => {
+    parrafo.textContent = mensaje;
+    primerError = primerError || campo;
+  };
+  if (!campoTareaMateria.value) {
+    marcar(campoTareaMateria, errorTareaMateria, "Elige la materia de la tarea.");
+  }
+  if (!campoTitulo.value.trim()) {
+    marcar(campoTitulo, errorTitulo, "El título no puede estar vacío.");
+  }
+  if (!campoFecha.value) {
+    marcar(campoFecha, errorFecha, "Elige la fecha de entrega.");
+  }
+  return primerError;
+}
+
+function mostrarErroresDelServidor(error) {
+  const campos = error.campos || {};
+  errorTareaMateria.textContent = campos.materia_id || "";
+  errorTitulo.textContent = campos.titulo || "";
+  errorDescripcion.textContent = campos.descripcion || "";
+  errorFecha.textContent = campos.fecha_entrega || "";
+  if (Object.keys(campos).length === 0) {
+    // Fallo de conexión, 404, etc.: mensaje general sin borrar lo escrito.
+    errorTarea.textContent = error.message;
+  }
+}
+
+async function guardarTarea(evento) {
+  evento.preventDefault();
+  limpiarErroresTarea();
+
+  const campoConError = validarFormularioTarea();
+  if (campoConError) {
+    campoConError.focus();
+    return;
+  }
+
+  const cuerpo = {
+    materia_id: Number(campoTareaMateria.value),
+    titulo: campoTitulo.value.trim(),
+    descripcion: campoDescripcion.value.trim(),
+    fecha_entrega: fechaConDesplazamiento(campoFecha.value, campoHora.value || HORA_POR_DEFECTO),
+  };
+
+  const id = campoTareaId.value;
+  try {
+    if (id) {
+      await api("PUT", `/api/tareas/${id}`, cuerpo);
+    } else {
+      await api("POST", "/api/tareas", cuerpo);
+    }
+    reiniciarFormularioTarea();
+    // total_tareas de las materias también cambia.
+    await recargarTodo();
+  } catch (error) {
+    // Se conserva lo escrito en el formulario para que el estudiante lo corrija.
+    mostrarErroresDelServidor(error);
+  }
+}
+
+async function borrarTarea(tarea) {
+  if (!window.confirm(`¿Borrar la tarea "${tarea.titulo}"?`)) {
+    return;
+  }
+  try {
+    await api("DELETE", `/api/tareas/${tarea.id}`);
+    if (campoTareaId.value === String(tarea.id)) {
+      reiniciarFormularioTarea();
+    }
+    await recargarTodo();
+  } catch (error) {
+    mostrarAviso(`No se pudo borrar la tarea. ${error.message}`);
+  }
+}
+
+actualizarContadoresTarea();
+campoTitulo.addEventListener("input", actualizarContadoresTarea);
+campoDescripcion.addEventListener("input", actualizarContadoresTarea);
+formTarea.addEventListener("submit", guardarTarea);
+botonCancelarTarea.addEventListener("click", reiniciarFormularioTarea);
+recargarTodo();

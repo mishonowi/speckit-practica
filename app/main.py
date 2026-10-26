@@ -10,6 +10,7 @@ from starlette.exceptions import HTTPException
 
 from app import db
 from app.rutas_materias import router as router_materias
+from app.rutas_tareas import router as router_tareas
 
 CARPETA_ESTATICA = Path(__file__).parent / "static"
 
@@ -36,6 +37,8 @@ def _mensaje_de_error(error: dict) -> str:
     if tipo == "value_error":
         # Los validadores propios lanzan ValueError con el mensaje ya en español.
         return str(contexto.get("error", "Valor inválido.")).removeprefix("Value error, ")
+    if tipo.startswith("datetime"):
+        return "La fecha y hora no son válidas."
     return "Valor inválido."
 
 
@@ -62,6 +65,7 @@ async def errores_http(_peticion: Request, excepcion: HTTPException):
 
 # Los routers de /api se registran antes del montaje estático.
 app.include_router(router_materias)
+app.include_router(router_tareas)
 
 # Debe ir al final: captura todo lo que no sea /api.
 app.mount("/", StaticFiles(directory=CARPETA_ESTATICA, html=True), name="frontend")
