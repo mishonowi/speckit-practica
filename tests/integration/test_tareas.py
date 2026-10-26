@@ -241,3 +241,36 @@ def test_borrar_materia_borra_sus_tareas_en_cascada(cliente):
 
     titulos = [t["titulo"] for t in cliente.get("/api/tareas").json()]
     assert titulos == ["Informe"]
+
+
+# --- HU3: estado de plazo (T029) --------------------------------------------
+
+def _dentro_de(**desplazamiento):
+    """Fecha ISO relativa al momento actual (las pruebas no dependen del reloj fijo)."""
+    from datetime import datetime, timedelta, timezone
+
+    return (datetime.now(timezone.utc) + timedelta(**desplazamiento)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def test_listado_incluye_estado_de_plazo(cliente):
+    materia = crear_materia(cliente)
+    crear_tarea(cliente, materia["id"], "Atrasada", _dentro_de(days=-2))
+    crear_tarea(cliente, materia["id"], "Mañana", _dentro_de(hours=24))
+    crear_tarea(cliente, materia["id"], "Lejana", _dentro_de(days=10))
+
+    estados = {t["titulo"]: t["estado_plazo"] for t in cliente.get("/api/tareas").json()}
+
+    assert estados == {"Atrasada": "vencida", "Mañana": "urgente", "Lejana": "normal"}
+
+
+def test_crear_y_editar_devuelven_estado_de_plazo(cliente):
+    materia = crear_materia(cliente)
+
+    creada = crear_tarea(cliente, materia["id"], fecha=_dentro_de(hours=5)).json()
+    assert creada["estado_plazo"] == "urgente"
+
+    editada = cliente.put(
+        f"/api/tareas/{creada['id']}",
+        json={"materia_id": materia["id"], "titulo": "Taller 3", "fecha_entrega": _dentro_de(days=-1)},
+    ).json()
+    assert editada["estado_plazo"] == "vencida"
